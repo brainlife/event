@@ -3,18 +3,17 @@
 //contrib
 const express = require('express');
 const router = express.Router();
-const winston = require('winston');
-const mongoose = require('mongoose');
-//const jwt = require('express-jwt');
+//const winston = require('winston');
+//const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 
 //mine
 const config = require('../config');
 const server = require('../server');
-const logger = new winston.Logger(config.logger.winston);
-const db = require('../models');
+//const logger = new winston.Logger(config.logger.winston);
+//const db = require('../models');
 
-router.use('/notification', require('./notification'));
+//router.use('/notification', require('./notification'));
 
 function json(obj) {
     return JSON.stringify(obj);
@@ -36,6 +35,7 @@ router.get('/health', function(req, res) {
         status = "failed";
         message = "amqp disconnected";
     }
+    /*
     if(mongoose.connection.readyState != 1) {
         status = "failed";
         message = "mongo not ready";
@@ -49,6 +49,7 @@ router.get('/health', function(req, res) {
         }
         res.json({ status, amqp_connected, mongoose_readystate: mongoose.connection.readyState, message });
     });
+    */
 });
 
 /**
@@ -68,7 +69,7 @@ router.get('/health', function(req, res) {
  */
 
 router.ws('/subscribe', (ws, req) => {
-    logger.debug("websocket /subscribe called");
+    console.debug("websocket /subscribe called");
     if(!server.amqp) {
         ws.send(json({error: "amqp not (yet) connected"}));
         return;
@@ -76,25 +77,25 @@ router.ws('/subscribe', (ws, req) => {
 
     //parse jwt
     jwt.verify(req.query.jwt, config.express.pubkey, (err, user)=>{
-        if(err) return logger.error(err);
-        logger.debug(user);
+        if(err) return console.error(err);
+        console.debug(user);
         req.user = user; //pretent it like express-jwt()
 
         //receive request from client
         ws.on('message', function(_msg) {
             var msg = JSON.parse(_msg); 
             if(msg.bind) {
-                logger.info("bind request recieved", msg);
+                console.log("bind request recieved", msg);
                 var ex = msg.bind.ex;
-                if(!config.event.exchanges[ex]) return logger.warn("unconfigured bind request for exchange:"+ex);
+                if(!config.event.exchanges[ex]) return console.warn("unconfigured bind request for exchange:"+ex);
 
                 //do access check for this bind request
-                logger.debug("checking access");
+                console.debug("checking access");
                 var access_check = config.event.exchanges[ex];
                 access_check(req, msg.bind, function(err, ok) {
-                    if(err) return logger.error(err);
+                    if(err) return console.error(err);
                     if(!ok) {
-                        logger.debug("access denied", msg.bind);
+                        console.debug("access denied", msg.bind);
                         ws.send(json({error: "Access denided "+ex}));
                         return;
                     }
@@ -104,7 +105,7 @@ router.ws('/subscribe', (ws, req) => {
                     server.amqp.queue('', {exclusive: true, closeChannelOnUnsubscribe: true}, (q) => {
                         q.bind(ex, msg.bind.key); 
                         q.subscribe(function(msg, headers, dinfo, ack) {
-                            logger.debug("received event!", dinfo);
+                            console.debug("received event!", dinfo);
                             ws.send(json({
                                 headers,
                                 dinfo,
@@ -113,7 +114,7 @@ router.ws('/subscribe', (ws, req) => {
 
                         }).addCallback(function(ok) {
                             ws.on('close', function(msg) {
-                                logger.info("client disconnected", q.name);
+                                console.log("client disconnected", q.name);
                                 q.unsubscribe(ok.consumerTag);
                             });
                         });

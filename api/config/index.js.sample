@@ -152,7 +152,7 @@ exports.handler = {
     },
 }
 
-exports.mongodb = "mongodb://localhost/event";
+//exports.mongodb = "mongodb://localhost/event";
 
 exports.express = {
     port: 12348,

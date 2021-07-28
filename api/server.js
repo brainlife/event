@@ -11,8 +11,7 @@ const cors = require('cors');
 const amqp = require('amqp');
 
 const config = require('./config');
-const logger = new winston.Logger(config.logger.winston);
-const db = require('./models');
+//const db = require('./models');
 
 //init express
 const app = express();
@@ -32,9 +31,9 @@ app.use('/', require('./controllers'));
 app.use(expressWinston.errorLogger(config.logger.winston)); 
 app.use(function(err, req, res, next) {
     if(typeof err == "string") err = {message: err};
-    logger.error(err);
+    console.error(err);
     if(err.stack) {
-        logger.error(err.stack);
+        console.error(err.stack);
         err.stack = "hidden"; //for ui
     }
     res.status(err.status || 500);
@@ -44,11 +43,11 @@ app.use(function(err, req, res, next) {
 exports.app = app;
 exports.amqp = null;
 exports.start = function(cb) {
-    logger.info("connecting to amqp");
+    console.log("connecting to amqp");
     var amqp_conn = amqp.createConnection(config.event.amqp, {reconnectBackoffTime: 1000*10});
     amqp_conn.on('ready', function() {
         //this could get called many times
-        logger.info("amqp connection ready");
+        console.log("amqp connection ready");
         exports.amqp = amqp_conn;
     });
     amqp_conn.on('error', function(err) {
@@ -58,12 +57,12 @@ exports.start = function(cb) {
 
     var port = process.env.PORT || config.express.port || '8081';
     var host = process.env.HOST || config.express.host || 'localhost';
-    db.init(function(err) {
-        if(err) return cb(err);
+    //db.init(function(err) {
+    //    if(err) return cb(err);
         //TODO wait tuntil amqp gets ready?
         app.listen(port, host, function() {
-            logger.info("event service running on %s:%d in %s mode", host, port, app.settings.env);
+            console.log("event service running on %s:%d in %s mode", host, port, app.settings.env);
         });
-    });
+    //});
 }
 
