@@ -47,9 +47,9 @@ router.get('/health', function(req, res) {
             status = "failed";
             message = err;
         }
-        res.json({ status, amqp_connected, mongoose_readystate: mongoose.connection.readyState, message });
     });
     */
+    res.json({ status, amqp_connected, message });
 });
 
 /**
