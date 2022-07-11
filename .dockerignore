@@ -1,9 +1,0 @@
-debug
-coverage
-example
-test
-barn
-api/config
-ui/config.js
-docker/config
-node_modules

@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --reporter spec",
-    "start": "node api/event.js",
-    "apidoc": "apidoc -i api/ -o docs/apidoc/",
+    "start": "node ./event.js",
+    "apidoc": "apidoc -i . -o ../docs/apidoc/",
     "cover": "node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha -- -R spec test/*.js",
     "deploy": "ssh -t test.brainlife.io sudo \"sudo /root/docker/event/update.sh\"",
     "deploy-prod": "ssh -t brainlife.io sudo \"sudo /root/docker/event/update.sh\""
