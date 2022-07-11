@@ -1,12 +1,3 @@
-nohup_grunt.out
-node_modules
-ui/bower_components
-ui/config.js
-**/barn
-api/config/index.js
-api/config/event.jwt
-api/config/smtp.password
-test/auth.key
-test/auth.pub
-test/test.jwt
-
+api/node_modules
+api/config
+docker/config/api/sca.jwt
