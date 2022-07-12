@@ -2,10 +2,10 @@
   "name": "sca-event",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "mocha --reporter spec",
     "start": "node ./event.js",
+    "dev": "./config/ensure_jwt.sh && nodemon",
+    "test": "mocha --reporter spec",
     "apidoc": "apidoc -i . -o ../docs/apidoc/",
     "cover": "node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha -- -R spec test/*.js",
     "deploy": "ssh -t test.brainlife.io sudo \"sudo /root/docker/event/update.sh\"",
@@ -38,6 +38,7 @@
     "winston": "^2.4.5"
   },
   "devDependencies": {
+    "nodemon": "^2.0.19",
     "supertest": "^3.4.2"
   }
 }
