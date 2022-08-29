@@ -69,7 +69,7 @@ router.get('/health', function(req, res) {
  */
 
 router.ws('/subscribe', (ws, req) => {
-    console.debug("websocket /subscribe called");
+    //console.debug("websocket /subscribe called");
     if(!server.amqp) {
         ws.send(json({error: "amqp not (yet) connected"}));
         return;
@@ -78,24 +78,23 @@ router.ws('/subscribe', (ws, req) => {
     //parse jwt
     jwt.verify(req.query.jwt, config.express.pubkey, (err, user)=>{
         if(err) return console.error(err);
-        console.debug(user);
+        //console.debug(user);
         req.user = user; //pretent it like express-jwt()
 
         //receive request from client
         ws.on('message', function(_msg) {
             var msg = JSON.parse(_msg); 
             if(msg.bind) {
-                console.log("bind request recieved", msg);
                 var ex = msg.bind.ex;
                 if(!config.event.exchanges[ex]) return console.warn("unconfigured bind request for exchange:"+ex);
 
                 //do access check for this bind request
-                console.debug("checking access");
+                //console.debug("checking access", ex, msg.bind);
                 var access_check = config.event.exchanges[ex];
                 access_check(req, msg.bind, function(err, ok) {
                     if(err) return console.error(err);
                     if(!ok) {
-                        console.debug("access denied", msg.bind);
+                        console.debug(".. access denied", msg.bind);
                         ws.send(json({error: "Access denided "+ex}));
                         return;
                     }
@@ -103,6 +102,7 @@ router.ws('/subscribe', (ws, req) => {
                     //good.. proceed with creating new queue / bind
                     //TODO - explain why the options?
                     server.amqp.queue('', {exclusive: true, closeChannelOnUnsubscribe: true}, (q) => {
+                        console.log(".. binding", msg.bind);
                         q.bind(ex, msg.bind.key); 
                         q.subscribe(function(msg, headers, dinfo, ack) {
                             console.debug("received event!", dinfo);
