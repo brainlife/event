@@ -4,6 +4,7 @@ ui/bower_components
 ui/config.js
 **/barn
 api/config/index.js
+api/config/auth.pub
 api/config/event.jwt
 api/config/smtp.password
 test/auth.key
