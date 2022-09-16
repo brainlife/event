@@ -55,10 +55,6 @@ exports.start = function(cb) {
             console.log("event service running on %s:%d in %s mode", host, port, app.settings.env);
         });
     });
-    amqp_conn.on('error', function(err) {
-        //(re)connection error? let's restart
-        throw new Error(err);
-    });
-
+    amqp_conn.on('error', console.error);
 }
 
