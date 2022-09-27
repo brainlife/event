@@ -43,11 +43,11 @@ exports.app = app;
 exports.amqp = null;
 exports.start = function(cb) {
     console.log("connecting to amqp");
-    var amqp_conn = amqp.createConnection(config.event.amqp, {reconnectBackoffTime: 1000*10});
-    amqp_conn.on('ready', function() {
-        //this could get called many times
-        console.log("amqp connection ready");
-        exports.amqp = amqp_conn;
+    var amqp_conn = amqp.createConnection(config.event.amqp);
+    amqp_conn.once('ready', err=>{
+        if(err) throw err;
+
+        exports.amqp = amqp_conn; //to give it to health checker
 
         var port = process.env.PORT || config.express.port || '8080';
         var host = process.env.HOST || config.express.host || 'localhost';
