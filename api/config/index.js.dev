@@ -4,7 +4,7 @@ const fs = require('fs');
 const request = require('request');
 
 exports.sca = {
-    auth_api: "http://brainlife_auth-api_1:8080",
+    auth_api: "http://brainlife_auth-api:8080",
 
     //jwt token used to access other services (like auth service)
     jwt: fs.readFileSync(__dirname+'/event.jwt', {encoding: 'ascii'}).trim(),
@@ -13,7 +13,7 @@ exports.sca = {
 //warning.. you don't get error message if your user/pass etc. are incorrect (it just keeps retrying silently..)
 exports.event = {
     amqp: {
-        url: "amqp://guest:guest@brainlife_rabbitmq_1:5672/brainlife"
+        url: "amqp://guest:guest@brainlife_rabbitmq:5672/brainlife"
     },
 
     //list of exchanges that this service supports and check_access cb
@@ -26,7 +26,7 @@ exports.event = {
         "wf.task": function(req, bind, cb) {
             let instance_id = bind.key.split(".")[0];
             request.get({
-                url: "http://brainlife_amaretti-api_1:8080/event/checkaccess/instance/"+instance_id, json: true,
+                url: "http://brainlife_amaretti-api:8080/event/checkaccess/instance/"+instance_id, json: true,
                 headers: {'Authorization': 'Bearer '+req.query.jwt}
             }, function(err, res, body) {
                 cb(err, (body.status == "ok"));
@@ -58,7 +58,7 @@ exports.event = {
             var project = bind.key.split(".")[0];
             console.log("checking warehouse.dataset access", project);
             request.get({
-                url: "http://brainlife_warehouse-api_1:8080/event/checkaccess/project/"+project,
+                url: "http://brainlife_warehouse-api:8080/event/checkaccess/project/"+project,
                 json: true,
                 headers: {'Authorization': 'Bearer '+req.query.jwt}
             }, function(err, res, body) {
@@ -89,7 +89,7 @@ exports.event = {
 
             console.debug("checking warehouse ex access", bind.key);
             request.get({
-                url: "http://brainlife_warehouse-api_1:8080/event/checkaccess/project/"+project,
+                url: "http://brainlife_warehouse-api:8080/event/checkaccess/project/"+project,
                 json: true,
                 headers: {'Authorization': 'Bearer '+req.query.jwt}
             }, function(err, res, body) {
