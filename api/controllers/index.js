@@ -75,18 +75,31 @@ router.ws('/subscribe', (ws, req) => {
         return;
     }
 
-    //parse jwt
-    jwt.verify(req.query.jwt, config.express.pubkey, (err, user)=>{
-        if(err) return console.error(err);
-        //console.debug(user);
+    jwt.verify(req.query.jwt, config.express.pubkey, (err, user) => {
+        if (err) {
+          ws.terminate(); // unauthorized, no need to keep around
+          return console.error(err);
+        }
+
         req.user = user; //pretent it like express-jwt()
 
         //receive request from client
         ws.on('message', function(_msg) {
-            var msg = JSON.parse(_msg); 
+
+            let msg;
+            try {
+              msg = JSON.parse(_msg); 
+            } catch (error) {
+              ws.terminate(); // dont misbehave
+              return;
+            }
+
             if(msg.bind) {
                 var ex = msg.bind.ex;
-                if(!config.event.exchanges[ex]) return console.warn("unconfigured bind request for exchange:"+ex);
+                if (!config.event.exchanges[ex]) {
+                    console.warn("Unconfigured bind request for exchange: " + ex);
+                    return;
+                }
 
                 //do access check for this bind request
                 //console.debug("checking access", ex, msg.bind);
